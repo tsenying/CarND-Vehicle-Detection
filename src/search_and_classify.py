@@ -95,20 +95,12 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
             on_windows.append(window)
     #8) Return windows for positive detections
     return on_windows
-    
-    
-# Read in cars and notcars
-images = glob.glob('*.jpeg')
-cars = []
-notcars = []
-for image in images:
-    if 'image' in image or 'extra' in image:
-        notcars.append(image)
-    else:
-        cars.append(image)
+
         
 # Read in car and non-car images
-images = glob.glob('./images/**/*.jpeg', recursive=True)
+## '/images/**/*.png', images in /images are .png
+## '/images_smallset/**/*.jpeg' images in /images_small_set are .jpeg
+images = glob.glob('./images_smallset/**/*.jpeg', recursive=True)
 cars = []
 notcars = []
 
@@ -124,22 +116,28 @@ print("len(notcars)={}".format(len(notcars)))
 
 # Reduce the sample size because
 # The quiz evaluator times out after 13s of CPU time
-sample_size = 500
-cars = cars[0:sample_size]
-notcars = notcars[0:sample_size]
+# sample_size = 500
+# cars = cars[0:sample_size]
+# notcars = notcars[0:sample_size]
 
 ### TODO: Tweak these parameters and see how the results change.
-color_space = 'HSV' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+# svc=LinearSVC(C=1.0, class_weight=None, dual=True, fit_intercept=True,
+#      intercept_scaling=1, loss='squared_hinge', max_iter=1000,
+#      multi_class='ovr', penalty='l2', random_state=None, tol=0.0001,verbose=0),
+# X_scaler=StandardScaler(copy=True, with_mean=True, with_std=True),
+# orient=9,pix_per_cell=8,cell_per_block=2,spatial_size=(32, 32),hist_bins=32
+
+color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb #( HSV, HLS)
 orient = 12  # HOG orientations
 pix_per_cell = 8 # HOG pixels per cell
 cell_per_block = 2 # HOG cells per block
 hog_channel = 'ALL' # Can be 0, 1, 2, or "ALL"
-spatial_size = (16, 16) # Spatial binning dimensions
+spatial_size = (32, 32) # Spatial binning dimensions
 hist_bins = 32    # Number of histogram bins
 spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
-y_start_stop = [360, 720] # Min and max in y to search in slide_window()
+y_start_stop = [400, 656] # Min and max in y to search in slide_window()
 
 car_features = extract_features(cars, color_space=color_space, 
                         spatial_size=spatial_size, hist_bins=hist_bins, 
