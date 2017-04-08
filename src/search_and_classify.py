@@ -98,19 +98,32 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
 
         
 # Read in car and non-car images
+dataset = 'large' # or 'small'
 ## '/images/**/*.png', images in /images are .png
 ## '/images_smallset/**/*.jpeg' images in /images_small_set are .jpeg
-images = glob.glob('./images_smallset/**/*.jpeg', recursive=True)
+
 cars = []
 notcars = []
+if (dataset == 'small'):
+    images = glob.glob('./images_smallset/**/*.jpeg', recursive=True)
 
-#e.g. './images/vehicles_smallset/cars3/998.jpeg'
-for image in images:
-    basename = os.path.basename( image )
-    if 'image' in basename or 'extra' in basename:
-        notcars.append(image)
-    else:
+
+    #e.g. './images/vehicles_smallset/cars3/998.jpeg'
+    for image in images:
+        basename = os.path.basename( image )
+        if 'image' in basename or 'extra' in basename:
+            notcars.append(image)
+        else:
+            cars.append(image)
+
+if (dataset == 'large'):
+    vehicles = glob.glob('./images/vehicles/**/*.png', recursive=True)
+    non_vehicles = glob.glob('./images/non-vehicles/**/*.png', recursive=True)
+    for image in vehicles:
         cars.append(image)
+    for image in non_vehicles:
+        notcars.append(image)
+        
 print("len(cars)={}".format(len(cars)))
 print("len(notcars)={}".format(len(notcars)))
 
@@ -179,6 +192,26 @@ t2 = time.time()
 print(round(t2-t, 2), 'Seconds to train SVC...')
 # Check the score of the SVC
 print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
+
+# save StandardScaler and LinearSVC
+import pickle
+trained = { 
+    "svc": svc, 
+    "scaler": X_scaler,
+    "orient": orient,
+    "pix_per_cell": pix_per_cell,
+    "cell_per_block": cell_per_block,
+    "spatial_size": spatial_size,
+    "hist_bins": hist_bins,
+    "color_space": color_space,
+    "hog_channel": hog_channel,
+    "spatial_feat": spatial_feat,
+    "hist_feat": hist_feat,
+    "hog_feat": hog_feat,
+    "y_start_stop": y_start_stop
+}
+pickle.dump( trained, open( "svc_trained.p", "wb" ) )
+
 # Check the prediction time for a single sample
 t=time.time()
 

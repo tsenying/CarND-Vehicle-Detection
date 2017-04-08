@@ -54,6 +54,10 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
         file_features = []
         # Read in each one by one
         image = mpimg.imread(file)
+        # convert to 0-255 uint8 if png file (0-1 float32)
+        if (image.dtype == 'float32'):
+            image=(image*255).astype('uint8')
+        
         # apply color conversion if other than 'RGB'
         if color_space != 'RGB':
             if color_space == 'HSV':
