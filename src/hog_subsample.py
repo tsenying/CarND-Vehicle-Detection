@@ -3,25 +3,10 @@
 #      multi_class='ovr', penalty='l2', random_state=None, tol=0.0001,
 #      verbose=0),X_scaler=StandardScaler(copy=True, with_mean=True, with_std=True),orient=9,pix_per_cell=8,cell_per_block=2,spatial_size=(32, 32),hist_bins=32
      
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
 import numpy as np
-import pickle
 import cv2
 from feature_extraction_utils import *
 
-dist_pickle = pickle.load( open("svc_trained.p", "rb" ) )
-svc = dist_pickle["svc"]
-X_scaler = dist_pickle["scaler"]
-orient = dist_pickle["orient"]
-pix_per_cell = dist_pickle["pix_per_cell"]
-cell_per_block = dist_pickle["cell_per_block"]
-spatial_size = dist_pickle["spatial_size"]
-hist_bins = dist_pickle["hist_bins"]
-
-print("svc={},X_scaler={},orient={},pix_per_cell={},cell_per_block={},spatial_size={},hist_bins={}".format(svc,X_scaler,orient,pix_per_cell,cell_per_block,spatial_size,hist_bins))
-
-img = mpimg.imread('test_images/test4.jpg')
 
 # Define a single function that can extract features using hog sub-sampling and make predictions
 def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
@@ -91,11 +76,29 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
 
     return draw_img
 
-ystart = 400
-ystop = 656
-scale = 1.5
+if __name__ == "__main__":
+    import matplotlib.image as mpimg
+    import matplotlib.pyplot as plt
+    import pickle
+    
+    dist_pickle = pickle.load( open("svc_trained.p", "rb" ) )
+    svc = dist_pickle["svc"]
+    X_scaler = dist_pickle["scaler"]
+    orient = dist_pickle["orient"]
+    pix_per_cell = dist_pickle["pix_per_cell"]
+    cell_per_block = dist_pickle["cell_per_block"]
+    spatial_size = dist_pickle["spatial_size"]
+    hist_bins = dist_pickle["hist_bins"]
 
-out_img = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+    print("svc={},X_scaler={},orient={},pix_per_cell={},cell_per_block={},spatial_size={},hist_bins={}".format(svc,X_scaler,orient,pix_per_cell,cell_per_block,spatial_size,hist_bins))
 
-plt.imshow(out_img)
-plt.show()
+    img = mpimg.imread('test_images/test4.jpg')
+    
+    ystart = 400
+    ystop = 656
+    scale = 1.5
+
+    out_img = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+
+    plt.imshow(out_img)
+    plt.show()
