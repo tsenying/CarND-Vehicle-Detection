@@ -29,15 +29,18 @@ class VehicleDetection():
         """
         
         # 1. detect cars in image at different scales
-        scale = 1.5
-        detects_image, box_list = hog_subsample.find_cars(image, 
-            config.settings["y_start_stop"][0], config.settings["y_start_stop"][1], 
-            scale, 
-            config.settings["svc"], 
-            config.settings["scaler"], 
-            config.settings["orient"], 
-            config.settings["pix_per_cell"], config.settings["cell_per_block"], 
-            config.settings["spatial_size"], config.settings["hist_bins"])
+        box_list = []
+        for scale in [1.0, 1.5, 2.0]:
+            scale = 1.5
+            detects_image, boxes = hog_subsample.find_cars(image, 
+                config.settings["y_start_stop"][0], config.settings["y_start_stop"][1], 
+                scale, 
+                config.settings["svc"], 
+                config.settings["scaler"], 
+                config.settings["orient"], 
+                config.settings["pix_per_cell"], config.settings["cell_per_block"], 
+                config.settings["spatial_size"], config.settings["hist_bins"])
+            box_list.extend(boxes)
         
         # 2. heat map and threshold
         
