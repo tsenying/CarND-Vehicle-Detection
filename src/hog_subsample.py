@@ -1,8 +1,3 @@
-# svc=LinearSVC(C=1.0, class_weight=None, dual=True, fit_intercept=True,
-#      intercept_scaling=1, loss='squared_hinge', max_iter=1000,
-#      multi_class='ovr', penalty='l2', random_state=None, tol=0.0001,
-#      verbose=0),X_scaler=StandardScaler(copy=True, with_mean=True, with_std=True),orient=9,pix_per_cell=8,cell_per_block=2,spatial_size=(32, 32),hist_bins=32
-     
 import numpy as np
 import cv2
 from feature_extraction_utils import *
@@ -17,8 +12,14 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
     # image you are searching is a .jpg (scaled 0 to 255)
     #img = img.astype(np.float32)/255
     
+    # crop image to region of interest
     img_tosearch = img[ystart:ystop,:,:]
+    
+    # convert image to target color space
     ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YCrCb')
+    
+    # resize image according to scale
+    # if scale is > 1, then resize image smaller making relative size of fixed size search window larger
     if scale != 1:
         imshape = ctrans_tosearch.shape
         ctrans_tosearch = cv2.resize(ctrans_tosearch, (np.int(imshape[1]/scale), np.int(imshape[0]/scale)))
@@ -43,6 +44,8 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
     hog2 = get_hog_features(ch2, orient, pix_per_cell, cell_per_block, feature_vec=False)
     hog3 = get_hog_features(ch3, orient, pix_per_cell, cell_per_block, feature_vec=False)
 
+    boxes = []
+    
     for xb in range(nxsteps):
         for yb in range(nysteps):
              ypos = yb*cells_per_step
@@ -72,9 +75,11 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
                  xbox_left = np.int(xleft*scale)
                  ytop_draw = np.int(ytop*scale)
                  win_draw = np.int(window*scale)
-                 cv2.rectangle(draw_img,(xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart),(0,0,255),6) 
+                 box = [ (xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart) ]
+                 boxes.append(box)
+                 cv2.rectangle(draw_img,box[0],box[1],(0,0,255),6) 
 
-    return draw_img
+    return draw_img, boxes
 
 if __name__ == "__main__":
     import matplotlib.image as mpimg
@@ -98,7 +103,8 @@ if __name__ == "__main__":
     ystop = 656
     scale = 1.5
 
-    out_img = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
-
+    out_img, boxes = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+    
+    print ("boxes count={}, boxes={}".format(len(boxes), boxes))
     plt.imshow(out_img)
     plt.show()
