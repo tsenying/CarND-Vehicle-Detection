@@ -1,6 +1,9 @@
+import numpy as np
 import config
 from car import Car
 import hog_subsample
+import heatmap_threshold_detection
+from scipy.ndimage.measurements import label
 
 class VehicleDetection():
     """ Vehicle detection state
@@ -15,11 +18,11 @@ class VehicleDetection():
         # cars in each frame in history
         self.cars_history = []
         
-    def process_image( self, img ):
+    def process_image( self, image ):
         """Find cars in image
         
         Args:
-            img (numpy.ndarray): Source image. Color channels in RGB order.
+            image (numpy.ndarray): Source image. Color channels in RGB order.
 
         Returns:
             (numpy.ndarray): image decorated with bounding boxes around cars
@@ -27,7 +30,7 @@ class VehicleDetection():
         
         # 1. detect cars in image at different scales
         scale = 1.5
-        out_img, boxes = hog_subsample.find_cars(img, 
+        detects_image, box_list = hog_subsample.find_cars(image, 
             config.settings["y_start_stop"][0], config.settings["y_start_stop"][1], 
             scale, 
             config.settings["svc"], 
@@ -38,6 +41,21 @@ class VehicleDetection():
         
         # 2. heat map and threshold
         
-        return out_img
+        # Make zeros shaped like image
+        heat = np.zeros_like(image[:,:,0]).astype(np.float)
+
+        # Add heat for each box in box list
+        heat = heatmap_threshold_detection.add_heat(heat, box_list)
+
+        # Apply threshold to help remove false positives
+        heat_threshold = 1
+        heat = heatmap_threshold_detection.apply_threshold(heat, heat_threshold)
+
+        # Find final boxes from heatmap using label function
+        heatmap = np.clip(heat, 0, 255) # only need to clip if there is more than 255 boxes around a point?
+        labels = label(heatmap)
+        draw_image = heatmap_threshold_detection.draw_labeled_bboxes(np.copy(image), labels)
+        
+        return draw_image
         
         
