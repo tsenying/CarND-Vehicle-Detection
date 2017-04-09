@@ -85,7 +85,13 @@ if __name__ == "__main__":
     import matplotlib.image as mpimg
     import matplotlib.pyplot as plt
     import pickle
+    import sys
     
+    scale = 1.5
+    if ( len(sys.argv) > 1 ):
+        scale = float( sys.argv[1] )
+    print("scale={}".format(scale))
+        
     dist_pickle = pickle.load( open("svc_trained.p", "rb" ) )
     svc = dist_pickle["svc"]
     X_scaler = dist_pickle["scaler"]
@@ -101,7 +107,7 @@ if __name__ == "__main__":
     
     ystart = 400
     ystop = 656
-    scale = 1.5
+
 
     out_img, boxes = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
     
