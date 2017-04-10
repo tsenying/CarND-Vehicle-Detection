@@ -1,10 +1,12 @@
 import numpy as np
 import cv2
 from feature_extraction_utils import *
-
+import matplotlib.pyplot as plt
+import config
 
 # Define a single function that can extract features using hog sub-sampling and make predictions
-def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
+def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins,
+    xstart=None, xstop=None):
     
     draw_img = np.copy(img)
     # Uncomment the following line if you extracted training
@@ -13,7 +15,17 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
     #img = img.astype(np.float32)/255
     
     # crop image to region of interest
-    img_tosearch = img[ystart:ystop,:,:]
+    if (xstart == None):
+        xstart = 0
+    if (xstop  == None):
+        print("img.shape={}".format(img.shape))
+        xstop  = img.shape[1]
+    img_tosearch = img[ystart:ystop, xstart:xstop,:]
+    
+    if ( config.debug ):
+        print("find_cars frame={}, xstart={}, xstop={}, img_tosearch.shape={}".format(config.count, xstart, xstop, img_tosearch.shape))
+        plt.imshow(img_tosearch)
+        plt.show()
     
     # convert image to target color space
     ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YCrCb')
@@ -91,6 +103,13 @@ if __name__ == "__main__":
     if ( len(sys.argv) > 1 ):
         scale = float( sys.argv[1] )
     print("scale={}".format(scale))
+    
+    xstart = None
+    xstop  = None
+    if ( len(sys.argv) > 4 ):
+        xstart = float( sys.argv[2] )
+        xstop  = float( sys.argv[3] )
+        print( "xstart={},xstop={}".format(xstart,xstop) )
         
     dist_pickle = pickle.load( open("svc_trained.p", "rb" ) )
     svc = dist_pickle["svc"]
@@ -109,7 +128,7 @@ if __name__ == "__main__":
     ystop = 656
 
 
-    out_img, boxes = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+    out_img, boxes = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, xstart, xstop)
     
     print ("boxes count={}, boxes={}".format(len(boxes), boxes))
     plt.imshow(out_img)

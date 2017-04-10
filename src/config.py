@@ -26,3 +26,4 @@ heatmap_threshold = 5
 
 # debug log file
 debug_log = None
+debug = False

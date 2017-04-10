@@ -1,10 +1,19 @@
 #
 # main control code for processing video
 #
+import sys
 import cv2
 import pickle
 import config
 from vehicle_detection import VehicleDetection
+
+
+video_file_path = 'test_video.mp4'
+output_video_file_path = 'cars_video.mp4'
+
+if ( len(sys.argv) > 1 ):
+    video_file_path = sys.argv[1]
+print("video file path={}".format(video_file_path))
 
 # Read in the saved StandardScalar and trained classifier
 # and feature detection settings
@@ -17,14 +26,14 @@ print("config.settings={}".format(config.settings))
 config.debug_log = open('debug.log', 'w')
 
 # open video file
-cap = cv2.VideoCapture('test_video.mp4')
+cap = cv2.VideoCapture(video_file_path)
 fps = cap.get(cv2.CAP_PROP_FPS) # get frame per second info
 
 # set up video writer for MP4
 # http://www.pyimagesearch.com/2016/02/22/writing-to-video-with-opencv/
 # *’mp4v’ -> .mp4
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-cars_video = cv2.VideoWriter('cars_video.mp4',fourcc,fps,( config.image_shape['width'], config.image_shape['height'] ))
+cars_video = cv2.VideoWriter(output_video_file_path,fourcc,fps,( config.image_shape['width'], config.image_shape['height'] ))
 
 config.count = 0
 config.vehicle_detection = VehicleDetection( config.nframes )
@@ -52,7 +61,7 @@ while(cap.isOpened()):
             print("processing frame {}, shape={}".format(config.count, frame.shape))
                 
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        cv2.imwrite('./debug_images/orig/frame' + str(config.count) + '.jpg', cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR) )
+        #cv2.imwrite('./debug_images/orig/frame' + str(config.count) + '.jpg', cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR) )
         
         # process image
         image_with_cars = config.vehicle_detection.process_image(frame_rgb)

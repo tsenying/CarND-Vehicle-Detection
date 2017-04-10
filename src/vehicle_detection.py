@@ -30,17 +30,27 @@ class VehicleDetection():
         """
         
         # 1. detect cars in image at different scales
+        
+        # Modify x/y start stop according to scale, cars appear smaller near horizon
+        scales = [
+            { "scale": 1.0, "x_start_stop": [0,1280], "y_start_stop":[400,528]},
+            { "scale": 1.5, "x_start_stop": [0,1280], "y_start_stop":[400,560]},
+            { "scale": 2.0, "x_start_stop": [0,1280], "y_start_stop":[400,592]},
+            { "scale": 3.0, "x_start_stop": [0,1280], "y_start_stop":[400,624]},
+            { "scale": 4.0, "x_start_stop": [0,1280], "y_start_stop":[400,656]}
+        ]
         box_list = []
-        for scale in [1.0, 1.5, 2.0]:
-            scale = 1.5
+        for scale_item in scales:
+            scale = scale_item["scale"]
             detects_image, boxes = hog_subsample.find_cars(image, 
-                config.settings["y_start_stop"][0], config.settings["y_start_stop"][1], 
+                scale_item["y_start_stop"][0], scale_item["y_start_stop"][1], 
                 scale, 
                 config.settings["svc"], 
                 config.settings["scaler"], 
                 config.settings["orient"], 
                 config.settings["pix_per_cell"], config.settings["cell_per_block"], 
-                config.settings["spatial_size"], config.settings["hist_bins"])
+                config.settings["spatial_size"], config.settings["hist_bins"],
+                scale_item["x_start_stop"][0], scale_item["x_start_stop"][1])
             box_list.extend(boxes)
             
         # Update history
