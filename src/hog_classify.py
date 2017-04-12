@@ -72,11 +72,11 @@ if __name__ == "__main__":
     import time
     
     # Read in car and non-car images
-    images = glob.glob('./images/**/*.jpeg', recursive=True)
+    images = glob.glob('./images_smallset/**/*.jpeg', recursive=True)
     cars = []
     notcars = []
 
-    #e.g. './images/vehicles_smallset/cars3/998.jpeg'
+    #e.g. './images_smallset/vehicles/cars3/998.jpeg'
     for image in images:
         basename = os.path.basename( image )
         if 'image' in basename or 'extra' in basename:

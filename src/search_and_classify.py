@@ -127,12 +127,6 @@ if (dataset == 'large'):
 print("len(cars)={}".format(len(cars)))
 print("len(notcars)={}".format(len(notcars)))
 
-# Reduce the sample size because
-# The quiz evaluator times out after 13s of CPU time
-# sample_size = 500
-# cars = cars[0:sample_size]
-# notcars = notcars[0:sample_size]
-
 ### TODO: Tweak these parameters and see how the results change.
 # svc=LinearSVC(C=1.0, class_weight=None, dual=True, fit_intercept=True,
 #      intercept_scaling=1, loss='squared_hinge', max_iter=1000,
