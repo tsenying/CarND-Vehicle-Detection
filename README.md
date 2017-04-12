@@ -105,7 +105,15 @@ HOG parameters include:
 
 ### Spatial Binning
 
+Spatial binning is a technique for capturing the spatial data of an image while reducing the number of features.
+It is done simply by reducing the size of an image while still retaining spatial signature.
+In our case, the original 64x64 is reduced on both dimensions by half, reducing the number of features to 1/4 of original size.  
+The spatial binning code is in function `bin_spatial` in [feature_extraction_utils.py](./src/feature_extraction_utils.py):line 34
+
 ### Color Histogram
+As the name implies, color histogram is another binning technique that captures the color signature of an image,  
+while reducing the number of features into the number of bins in the histogram.  
+The color histogram code is in function `color_hist` in [feature_extraction_utils.py](./src/feature_extraction_utils.py):line 42
 
 ## Classifier
 Classifiers are used to process an input feature set and determine output class.
@@ -137,6 +145,13 @@ Training steps involved are:
 The resulting scaler and classifier are saved into a pickle file for use in the video processing pipeline.
   
 ## Sliding Window Search
+The general approach for dealing with car varying sizes in an image is to use the *sliding window* approach.
+For a given *scale*, a sub-image is cut out from the whole image and examined to see if it contains a vehicle.
+A given scale *window* is slid across the image with some overlap until the entire image is examined.
+
+### Search Area
+- The upper part of the image above the horizon does not need to be searched.
+- Search areas vary by scale, smaller scales are more distant and occupy a narrow horizontal band near the horizon.
 
 ####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
@@ -151,7 +166,7 @@ Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spat
 ![alt text][image4]
 ---
 
-### Video Processing Implementation
+## Video Processing Implementation
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
 Here's a [link to my video result](./project_video.mp4)
@@ -182,4 +197,13 @@ Here's an example result showing the heatmap from a series of frames of video, t
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+
+#### Investigations
+- color space
+- channels used for features
+- scale windows
+- SVM decision function
+- history averaging
+- vehicle tracking/occlusion/separation
+- false positives
 
