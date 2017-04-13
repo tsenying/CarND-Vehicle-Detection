@@ -12,8 +12,8 @@ The goals of this project are the following:
 [//]: # (Image References)
 [image1]: ./output_images/hog_RGB_12_8_2.png
 [image2]: ./output_images/hog_YCrCb_12_16_2.png
-[image3]: ./examples/sliding_windows.jpg
-[image4]: ./examples/sliding_window.jpg
+[image3]: ./output_images/sliding_window_scale_1.0.png
+[image4]: ./output_images/sliding_window_scale_1.5.png
 [image5]: ./examples/bboxes_and_heat.png
 [image6]: ./examples/labels_map.png
 [image7]: ./examples/output_bboxes.png
@@ -153,17 +153,41 @@ A given scale *window* is slid across the image with some overlap until the enti
 - The upper part of the image above the horizon does not need to be searched.
 - Search areas vary by scale, smaller scales are more distant and occupy a narrow horizontal band near the horizon.
 
-####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
+The horizon for the test video is at about y=400, so the search window y value is set to start here,  
+the end y value varies with scale, with smaller scales requiring narrower bands to be searched.
+
+#### Scales Used
+A range of scales was tested with the following results:
+- 0.25 produces many spurious false positives, requires long compute times.
+- 0.5 produces mostly reasonable positives with some false positives
+- 0.75 comparable to 0.5, detects white car better, but more false positives
+- 1.0 does about as well as 0.75 with less false positives, distant cars are detected.  
+  Search area y end value can be reduced to 528 at this scale. ![alt text][image3]  
+- 1.5 distant cars start to drop off, e.g. in test image 3, the white car is not detected.  
+  Search area y end value is set to 560 at this scale. ![alt text][image4]
+- 2.0 good detection of mid-range cars with little false positives.  
+  Search area y value is basically set to entire image below horizon at this scale.
+- 3.0 may pick up near distance cars
+
+The scales selected are [1.0, 1.5, 2.0]  
+Smaller scales produce many false positives and require more compute time.  
+Larger scales may pick up more near distance cars.
+
+#### Window Overlap
+0.75 overlap was chosen as a tradeoff between detecting cars well enough and incurring more compute resources if more overlap was used.
+
+**Code**  
+The `scale` variant was tested using [hog_subsample.py](src/hog_subsample.py),
+the `find_cars` function in this file, which implements HOG subsampling to reduce computation, is also used in the video processing pipeline.
 
 I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
 
-![alt text][image3]
+
 
 ####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
 Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
 
-![alt text][image4]
 ---
 
 ## Video Processing Implementation
@@ -206,4 +230,4 @@ Here I'll talk about the approach I took, what techniques I used, what worked an
 - history averaging
 - vehicle tracking/occlusion/separation
 - false positives
-
+137,1047
