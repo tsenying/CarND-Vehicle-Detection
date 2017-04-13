@@ -78,12 +78,17 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
              spatial_features = bin_spatial(subimg, size=spatial_size)
              hist_features = color_hist(subimg, nbins=hist_bins)
 
-             # Scale features and make a prediction
+             # Scale features 
              test_features = X_scaler.transform(np.hstack((spatial_features, hist_features, hog_features)).reshape(1, -1))    
              #test_features = X_scaler.transform(np.hstack((shape_feat, hist_feat)).reshape(1, -1))    
-             test_prediction = svc.predict(test_features)
+             
+             # Compute prediction using classifier
+             # prediction = svc.predict(test_features)
+             score_threshold = 0.2
+             score = svc.decision_function(test_features)
+             prediction = int(score > score_threshold)
 
-             if test_prediction == 1:
+             if prediction == 1:
                  xbox_left = np.int(xleft*scale)
                  ytop_draw = np.int(ytop*scale)
                  win_draw = np.int(window*scale)
@@ -99,7 +104,7 @@ if __name__ == "__main__":
     import pickle
     import sys
     
-    scale = 1.5
+    scale = 2.0
     if ( len(sys.argv) > 1 ):
         scale = float( sys.argv[1] )
     print("scale={}".format(scale))
@@ -121,15 +126,32 @@ if __name__ == "__main__":
     hist_bins = dist_pickle["hist_bins"]
 
     print("svc={},X_scaler={},orient={},pix_per_cell={},cell_per_block={},spatial_size={},hist_bins={}".format(svc,X_scaler,orient,pix_per_cell,cell_per_block,spatial_size,hist_bins))
-
-    img = mpimg.imread('test_images/test4.jpg')
     
     ystart = 400
     ystop = 656
-
-
-    out_img, boxes = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, xstart, xstop)
     
-    print ("boxes count={}, boxes={}".format(len(boxes), boxes))
-    plt.imshow(out_img)
+    # Plot the result
+    fig, axes = plt.subplots(2, 3, squeeze=False, figsize=(8.5, 4.5))
+    # fig.tight_layout()
+    plt.suptitle( "Sliding Window: scale={0}, ystart={1}, ystop={2}".format(scale, ystart, ystop, xstart, xstop) )
+    
+
+    for i in range(1,7):
+        print("processing image " + str(i))
+        
+        img_path = 'test_images/test{0}.jpg'.format(str(i))
+        img = mpimg.imread(img_path)
+        
+        out_img, boxes = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, xstart, xstop)
+    
+        print ("boxes count={}, boxes={}".format(len(boxes), boxes ))
+        
+        row = (i-1)//3
+        col = (i-1)%3
+        print("i={0},row={1},col={2}".format(i,row,col))
+        axes[row][col].imshow(out_img)
+        axes[row][col].set_title('Image {0} detections={1}'.format(i, len(boxes)), fontsize=10)
+        
+    save_plot_path = "output_images/sliding_window_scale_{0}.png".format(scale)
+    plt.savefig(save_plot_path)
     plt.show()

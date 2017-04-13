@@ -22,7 +22,14 @@ settings = {
     "y_start_stop": [400, 656] # Min and max in y to search in slide_window()
 }
 
-heatmap_threshold = 5
+scales = [
+    { "scale": 1.0, "x_start_stop": [0,1280], "y_start_stop":[400,528]},
+    { "scale": 1.5, "x_start_stop": [0,1280], "y_start_stop":[400,560]},
+    { "scale": 2.0, "x_start_stop": [0,1280], "y_start_stop":[400,656]},
+    { "scale": 3.0, "x_start_stop": [0,1280], "y_start_stop":[400,656]}
+]
+
+heatmap_threshold = 3
 
 # debug log file
 debug_log = None
