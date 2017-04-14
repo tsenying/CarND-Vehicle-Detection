@@ -61,7 +61,7 @@ Vehicle detection processing steps in order are:
 4. Vehicle position **History Influence**  
 	Past vehicle location indicates future location.  
 	
-##1. Feature Extraction: Histogram of Oriented Gradients (HOG), Spatial Binning, Color Histogram 
+## Feature Extraction: Histogram of Oriented Gradients (HOG), Spatial Binning, Color Histogram 
 *What features to extract?*
 The features extracted from a sliding window sub-image need to be useful in distinguishing cars from non-cars.  
 The features used include: *Histogram of Oriented Gradients (HOG)*, *Spatial Binning*, and *Color Histogram*. 
