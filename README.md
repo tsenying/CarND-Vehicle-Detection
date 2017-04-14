@@ -14,10 +14,9 @@ The goals of this project are the following:
 [image2]: ./output_images/hog_YCrCb_12_16_2.png
 [image3]: ./output_images/sliding_window_scale_1.0.png
 [image4]: ./output_images/sliding_window_scale_1.5.png
-[image5]: ./examples/bboxes_and_heat.png
-[image6]: ./examples/labels_map.png
-[image7]: ./examples/output_bboxes.png
-[video1]: ./project_video.mp4
+[image55]: ./output_images/sliding_windows.png
+[image66]: ./output_images/heatmap_threshold.png
+
 
 ---
 
@@ -26,7 +25,7 @@ The goals of this project are the following:
 - README.md : this file
 - src/* : Python source files
 - svc_trained.p : Trained SVM Linear Classifier pickle file
-- https://youtu.be/uWMWS8afEXw : vehicle detection result video
+- [Vehicle detection result video](https://youtu.be/uWMWS8afEXw)
 
 ## Usage:
 
@@ -45,7 +44,7 @@ python src/process_video.py
 Vehicle detection in a stream of images from a camera or video has these aspects:
 
 Cars in a image can be at different distances, the same car will have varying apparent sizes inversely proportional to distances.
-The general approach for dealing with car varying sizes in an image is to use the *sliding window* approach.
+The general approach for dealing with car varying sizes in an image is to use the **sliding window** approach.
 For a given *scale*, a sub-image is cut out from the whole image and examined to see if it contains a vehicle.
 A given scale *window* is slid across the image with some overlap until the entire image is examined.  
 
@@ -55,12 +54,11 @@ the sub-image is determined to be a *car* or *not-car* by a classifier.
 The classifier is pre-trained with images known to be cars or non-cars.
 
 Vehicle detection processing steps in order are:
-1. Image Feature Extraction  
-2. Feature Classification  
-	What classifier to use
-3. Scaling and Sliding Window  
-	Vehicles appear at different scales depending on distance from camera
-4. Frame History Influence  
+1. Image **feature extraction**
+2. Feature **Classification** of image features
+3. **Detection** at different positions and scales  
+	Vehicles appear at different scales depending on distance, and different positions on road surface.
+4. Vehicle position **History Influence**  
 	Past vehicle location indicates future location.  
 	
 ##1. Feature Extraction: Histogram of Oriented Gradients (HOG), Spatial Binning, Color Histogram 
@@ -173,6 +171,9 @@ The scales selected are [1.0, 1.5, 2.0]
 Smaller scales produce many false positives and require more compute time.  
 Larger scales may pick up more near distance cars.
 
+For the scales used, starting at 1.0, the true positive detections can extend the entire width of the image,
+so the x start and stop values are set for the entire width of the image.
+
 #### Window Overlap
 0.75 overlap was chosen as a tradeoff between detecting cars well enough and incurring more compute resources if more overlap was used.
 
@@ -180,54 +181,79 @@ Larger scales may pick up more near distance cars.
 The `scale` variant was tested using [hog_subsample.py](src/hog_subsample.py),
 the `find_cars` function in this file, which implements HOG subsampling to reduce computation, is also used in the video processing pipeline.
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+The scales and overlap used and search window per scale is visualized here,  
+scales color: blue = 1.0, green = 1.5, red = 2.0
+![alt text][image55]
 
 
+#### Features Used
 
-####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
+From the investigations described, the features that produced good results and used for the video processing pipeline are:  
+- YCrCb 3-channel HOG features at 3 scales,  
+- plus spatially binned features 
+- and histograms of color in the feature vector.
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+### False Positive Filtering using Heatmap Thresholding
 
+The classifier computes *false positives* that need to be filtered out.  
+Most *false positives* are transitory and do not persist much beyond a single frame.
+
+The **heat-map thresholding** approach can be used to filter out *false positives*.  
+- Bounding boxes for detections are overlayed on a single blank image. [heatmap_threshold_detection.py#add_heat:line 11](src/heatmap_threshold_detection.py)  
+- The resulting heat-map is thresholded to reject pixels below the threshold. [heatmap_threshold_detection.py#apply_threshold 21](src/heatmap_threshold_detection.py)  
+- Bounding boxes are then calculated for remaining non-zero pixels, these boxes should represent detected cars.  
+Done using [label](https://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.ndimage.measurements.label.html) function from the [SciPy](https://docs.scipy.org) library.
+
+This approach is visualized here for the test images:
+![alt text][image66]
 ---
 
 ## Video Processing Implementation
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+####1. [Vehicle detection result video](https://youtu.be/uWMWS8afEXw)
 
+####2. Vehicle position smoothing using history
+Classifier results from frame to frame vary significantly leading to significant variation in bounding boxes for vehicles.
+Past history of vehicle positions can be used to smooth out the vehicle bounding boxes of the video frame sequence.  
 
-####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
-
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
-
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
-
-### Here are six frames and their corresponding heatmaps:
-
-![alt text][image5]
-
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
-
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
-
+The approach used is to keep the history of classifier positive detection bounding boxes for a number of frames during video processing,  
+for each frame, the current set of classifier positive detection bounding boxes is combined with past history to compute 
+the current set of vehicle bounding boxes. [vehicle_detection.py 54](src/vehicle_detection.py)  
 
 
 ---
 
 ###Discussion
 
-####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+####1. Problems and Issues
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+As with any classification problem, choosing the right set of features for classifier training and prediction is key.
+We chose to use the **YCrCb** _color space_ for HOG features although some other color space may work as well or in combination.  
+
+Color **spatial binning** features and **Color Histogram** features were also used.
+There is a tradeoff between extracting enough features to distinguish between cars and non-cars and too many features that result in high computation cost.  
+
+#### Where will your pipeline likely fail?  
+1. A sufficient training set is vital in providing correct classification.  
+The small training set produced a trained classifier that was unable to detect white cars.  
+Even the large training set appear skewed towards dark color cars and performed poorly on detecting white cars.
+
+2. Structured images such as railings and lane lines produced false positives.
+
+#### What could you do to make it more robust?
+
+The LinearSVC SVM classifier with default settings was used.
+Other settings and/or classifiers could be explored.
+
+#### Vehicle tracking/occlusion/separation
+Individual vehicle positions should be tracked and predicted.  
+This would allow vehicle image merging and occlusions to be handled.
+[Kalman filter](https://en.wikipedia.org/wiki/Kalman_filter) may be a good approach.
 
 #### Investigations
-- color space
 - channels used for features
 - scale windows
 - SVM decision function
 - history averaging
-- vehicle tracking/occlusion/separation
 - false positives
 137,1047
