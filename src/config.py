@@ -24,7 +24,7 @@ settings = {
 
 scales = [
     { "scale": 1.0, "x_start_stop": [0,1280], "y_start_stop":[400,528]},
-    { "scale": 1.5, "x_start_stop": [0,1280], "y_start_stop":[400,560]},
+    { "scale": 1.5, "x_start_stop": [0,1280], "y_start_stop":[400,592]},
     { "scale": 2.0, "x_start_stop": [0,1280], "y_start_stop":[400,656]},
     { "scale": 3.0, "x_start_stop": [0,1280], "y_start_stop":[400,656]}
 ]

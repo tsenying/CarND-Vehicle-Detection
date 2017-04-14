@@ -2,10 +2,9 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import config
 
-image = mpimg.imread('test_images/test1.jpg')
-
-# Here is your draw_boxes function from the previous exercise
+# Draws boxes on an image
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
     # Make a copy of the image
     imcopy = np.copy(img)
@@ -61,9 +60,15 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
     # Return the list of windows
     return window_list
 
-windows = slide_window(image, x_start_stop=[None, None], y_start_stop=[None, None], 
-                    xy_window=(128, 128), xy_overlap=(0.5, 0.5))
-                       
-window_img = draw_boxes(image, windows, color=(0, 0, 255), thick=6)                    
-plt.imshow(window_img)
-plt.show()
+if __name__ == "__main__":
+    image = mpimg.imread('test_images/test1.jpg')
+    colors = [(0, 0, 255),(0, 255, 0),(255, 0, 0)]
+    for i in range(0,3):
+        scale = config.scales[i]
+        xy_window= (np.array([64,64]) * scale["scale"]).astype('uint8')
+        windows = slide_window(image, x_start_stop=scale["x_start_stop"], y_start_stop=scale["y_start_stop"], 
+                            xy_window=xy_window, xy_overlap=(0.75, 0.75))
+        image = draw_boxes(image, windows, color=colors[i], thick=3)
+                        
+    plt.imshow(image)
+    plt.show()
