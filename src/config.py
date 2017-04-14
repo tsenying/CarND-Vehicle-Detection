@@ -22,7 +22,8 @@ settings = {
 }
 
 scales = [
-    { "scale": 1.1, "x_start_stop": [0,1280], "y_start_stop":[400,528]}, # 1.1 instead of 1.0 eliminates lane line false positives
+    # 1.1 instead of 1.0 eliminates lane line false positives, but drops white car starting at frame 690 for several frames
+    { "scale": 1.1, "x_start_stop": [0,1280], "y_start_stop":[400,528]}, 
     { "scale": 1.5, "x_start_stop": [0,1280], "y_start_stop":[400,560]},
     { "scale": 2.0, "x_start_stop": [0,1280], "y_start_stop":[400,656]},
     { "scale": 3.0, "x_start_stop": [0,1280], "y_start_stop":[400,656]}
