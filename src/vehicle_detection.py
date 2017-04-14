@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 import config
 from car import Car
 import hog_subsample
@@ -32,13 +33,8 @@ class VehicleDetection():
         # 1. detect cars in image at different scales
         
         # Modify x/y start stop according to scale, cars appear smaller near horizon
-        scales = [
-            { "scale": 1.0, "x_start_stop": [0,1280], "y_start_stop":[400,528]},
-            { "scale": 1.5, "x_start_stop": [0,1280], "y_start_stop":[400,560]},
-            { "scale": 2.0, "x_start_stop": [0,1280], "y_start_stop":[400,592]},
-            { "scale": 3.0, "x_start_stop": [0,1280], "y_start_stop":[400,624]},
-            { "scale": 4.0, "x_start_stop": [0,1280], "y_start_stop":[400,656]}
-        ]
+        scales = config.scales
+        
         box_list = []
         for scale_item in scales:
             scale = scale_item["scale"]
@@ -72,8 +68,12 @@ class VehicleDetection():
         # Find final boxes from heatmap using label function
         heatmap = np.clip(heat, 0, 255) # only need to clip if there is more than 255 boxes around a point?
         labels = label(heatmap)
-        draw_image = heatmap_threshold_detection.draw_labeled_bboxes(np.copy(image), labels)
+        boxed_image = heatmap_threshold_detection.draw_labeled_bboxes(np.copy(image), labels)
         
-        return draw_image
+        # frame image annotation
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(boxed_image,"Frame:{}".format(config.count), (10,100), font, 1, (255,255,255), 2 ,cv2.LINE_AA )
+        
+        return boxed_image
         
         

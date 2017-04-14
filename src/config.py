@@ -2,7 +2,7 @@
 count = 0
 
 # number of frames to keep in history for smoothing
-nframes = 5
+nframes = 8
 
 image_shape = { 'width': 1280, 'height': 720 }
 
@@ -18,18 +18,18 @@ settings = {
     "hist_bins": 32,    # Number of histogram bins
     "spatial_feat": True, # Spatial features on or off
     "hist_feat": True, # Histogram features on or off
-    "hog_feat": True, # HOG features on or off
-    "y_start_stop": [400, 656] # Min and max in y to search in slide_window()
+    "hog_feat": True # HOG features on or off
 }
 
 scales = [
-    { "scale": 1.0, "x_start_stop": [0,1280], "y_start_stop":[400,528]},
-    { "scale": 1.5, "x_start_stop": [0,1280], "y_start_stop":[400,592]},
+    { "scale": 1.1, "x_start_stop": [0,1280], "y_start_stop":[400,528]}, # 1.1 instead of 1.0 eliminates lane line false positives
+    { "scale": 1.5, "x_start_stop": [0,1280], "y_start_stop":[400,560]},
     { "scale": 2.0, "x_start_stop": [0,1280], "y_start_stop":[400,656]},
     { "scale": 3.0, "x_start_stop": [0,1280], "y_start_stop":[400,656]}
 ]
 
-heatmap_threshold = 3
+svm_score_threshold = 0.333
+heatmap_threshold = 4
 
 # debug log file
 debug_log = None

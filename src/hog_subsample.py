@@ -84,9 +84,8 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
              
              # Compute prediction using classifier
              # prediction = svc.predict(test_features)
-             score_threshold = 0.2
              score = svc.decision_function(test_features)
-             prediction = int(score > score_threshold)
+             prediction = int(score > config.svm_score_threshold)
 
              if prediction == 1:
                  xbox_left = np.int(xleft*scale)
@@ -104,7 +103,7 @@ if __name__ == "__main__":
     import pickle
     import sys
     
-    scale = 2.0
+    scale = 1.0
     if ( len(sys.argv) > 1 ):
         scale = float( sys.argv[1] )
     print("scale={}".format(scale))
