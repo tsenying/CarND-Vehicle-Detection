@@ -210,7 +210,10 @@ This approach is visualized here for the test images:
 
 ## Video Processing Implementation
 
-####1. [Vehicle detection result video](https://youtu.be/uWMWS8afEXw)
+####1. [Vehicle detection result video](https://youtu.be/IU0ETazeQ4Q)
+[![Vehicle Detection](https://img.youtube.com/vi/IU0ETazeQ4Q/0.jpg)](https://youtu.be/IU0ETazeQ4Q)
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/IU0ETazeQ4Q" frameborder="0" allowfullscreen></iframe>
 
 ####2. Vehicle position smoothing using history
 Classifier results from frame to frame vary significantly leading to significant variation in bounding boxes for vehicles.
@@ -218,14 +221,17 @@ Past history of vehicle positions can be used to smooth out the vehicle bounding
 
 The approach used is to keep the history of classifier positive detection bounding boxes for a number of frames during video processing,  
 for each frame, the current set of classifier positive detection bounding boxes is combined with past history to compute 
-the current set of vehicle bounding boxes. [vehicle_detection.py 54](src/vehicle_detection.py)  
+the current set of vehicle bounding boxes. [vehicle_detection.py line:54](src/vehicle_detection.py)  
 
+####3. Classifier false positive reduction
+The LinearSVC [decision function](http://scikit-learn.org/stable/modules/svm.html) was used to reduce false positives. 
+Used in the find_cars functions [src/hog_subsample.py line:87](src/hog_subsample.py)
 
 ---
 
-###Discussion
+### Discussion
 
-####1. Problems and Issues
+#### Problems and Issues
 
 As with any classification problem, choosing the right set of features for classifier training and prediction is key.
 We chose to use the **YCrCb** _color space_ for HOG features although some other color space may work as well or in combination.  
