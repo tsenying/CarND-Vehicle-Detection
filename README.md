@@ -2,7 +2,7 @@
 
 The goals of this project are the following:
 
-* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a classifier Linear SVM classifier
+* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a Linear SVM classifier
 * In addition, apply a color transform to each video frame image and then append binned color features, as well as histograms of color, to the HOG feature vector. 
 * For the first two steps, normalize the features and randomize a selection for training and testing.
 * Implement a sliding-window technique and use the trained classifier to search for vehicles in images.
@@ -25,18 +25,18 @@ The goals of this project are the following:
 - README.md : this file
 - src/* : Python source files
 - svc_trained.p : Trained SVM Linear Classifier pickle file
-- [Vehicle detection result video](https://youtu.be/uWMWS8afEXw)
+- [Vehicle detection result video](https://youtu.be/IU0ETazeQ4Q)
 
 ## Usage:
 
-Create sklearn.preprocessing.StandardScaler from train data
-and train sklearn.svm.LinearSVC linear SVM classifier from train data,  
-saved results to svc_trained.p
+Create [sklearn.preprocessing.StandardScaler](http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html) from train data
+and train [sklearn.svm.LinearSVC](http://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html) linear SVM classifier from train data,  
+saves results to `svc_trained.p`
 ```
 python src/search_and_classify.py
 ```
 
-Run video processing pipeline, and output results to 'cars_video.mp4':
+Run video processing pipeline, and output results to `cars_video.mp4`:
 ```
 python src/process_video.py 
 ```
@@ -44,7 +44,7 @@ python src/process_video.py
 Vehicle detection in a stream of images from a camera or video has these aspects:
 
 Cars in a image can be at different distances, the same car will have varying apparent sizes inversely proportional to distances.
-The general approach for dealing with car varying sizes in an image is to use the **sliding window** approach.
+The general approach for dealing with cars varying sizes in an image is to use the **sliding window** approach.
 For a given *scale*, a sub-image is cut out from the whole image and examined to see if it contains a vehicle.
 A given scale *window* is slid across the image with some overlap until the entire image is examined.  
 
@@ -56,14 +56,14 @@ The classifier is pre-trained with images known to be cars or non-cars.
 Vehicle detection processing steps in order are:
 1. Image **feature extraction**
 2. Feature **Classification** of image features
-3. **Detection** at different positions and scales  
+3. Sliding window **detection** at different positions and scales  
 	Vehicles appear at different scales depending on distance, and different positions on road surface.
 4. Vehicle position **History Influence**  
 	Past vehicle location indicates future location.  
 	
 ##1. Feature Extraction: Histogram of Oriented Gradients (HOG), Spatial Binning, Color Histogram 
 *What features to extract?*
-The features extracted from a sliding window sub-image are determined to be useful in distinguishing cars from non-cars.  
+The features extracted from a sliding window sub-image need to be useful in distinguishing cars from non-cars.  
 The features used include: *Histogram of Oriented Gradients (HOG)*, *Spatial Binning*, and *Color Histogram*. 
 	
 ### Histogram of Oriented Gradients
@@ -72,9 +72,9 @@ The [HOG feature descriptor](http://scikit-image.org/docs/dev/auto_examples/feat
 divides the image into sub-cells. For each cell, the gradient is detected, then a histogram of gradients is computed.  
 This results in a set of histograms for the image.
 
-These histograms provide a signature that differentiates between cars and non-cars.
+These histograms provide a signature that can be used to differentiate between cars and non-cars.
 
-Code for HOG feature detection is in function `get_hog_features` [feature_extraction_utils.py](./src/feature_extraction_utils.py):line 14  
+Code for HOG feature detection is in function `get_hog_features` [feature_extraction_utils.py:line 14  ](./src/feature_extraction_utils.py)
 
 Here is an example of HOG features for the RGB color space for one of each of the `vehicle` and `non-vehicle` classes:
 
@@ -89,7 +89,7 @@ Another permutation of parameters using color space 'YCrCb' is shown here:
 The above example shows a larger pixels_per_cell size leads to lower detail captured.
 
 Different color spaces were investigated, including RGB, HSV, YUV, YCrCb as input to the HOG function.  
-Varying HOG parameters were experimented.
+Varying HOG parameters were experimented with.
 
 #### Choice of HOG parameters
 HOG parameters include:
@@ -105,7 +105,7 @@ HOG parameters include:
 
 Spatial binning is a technique for capturing the spatial data of an image while reducing the number of features.
 It is done simply by reducing the size of an image while still retaining spatial signature.
-In our case, the original 64x64 is reduced on both dimensions by half, reducing the number of features to 1/4 of original size.  
+In our case, the original 64x64 is reduced on both dimensions by half to 32x32, reducing the number of features to 1/4 of original size.  
 The spatial binning code is in function `bin_spatial` in [feature_extraction_utils.py](./src/feature_extraction_utils.py):line 34
 
 ### Color Histogram
@@ -210,10 +210,10 @@ This approach is visualized here for the test images:
 
 ## Video Processing Implementation
 
-####1. [Vehicle detection result video](https://youtu.be/IU0ETazeQ4Q)
+####1. [Vehicle detection result video](https://youtu.be/IU0ETazeQ4Q)  
+
 [![Vehicle Detection](https://img.youtube.com/vi/IU0ETazeQ4Q/0.jpg)](https://youtu.be/IU0ETazeQ4Q)
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/IU0ETazeQ4Q" frameborder="0" allowfullscreen></iframe>
 
 ####2. Vehicle position smoothing using history
 Classifier results from frame to frame vary significantly leading to significant variation in bounding boxes for vehicles.
@@ -242,9 +242,10 @@ There is a tradeoff between extracting enough features to distinguish between ca
 #### Where will your pipeline likely fail?  
 1. A sufficient training set is vital in providing correct classification.  
 The small training set produced a trained classifier that was unable to detect white cars.  
-Even the large training set appear skewed towards dark color cars and performed poorly on detecting white cars.
+Even the large training set appear skewed towards dark color cars and performed poorly on detecting white cars.  
 
-2. Structured images such as railings and lane lines produced false positives.
+2. Structured images such as railings and lane lines produced false positives.  
+Non-car training images probably should be enhanced with lane images to avoid false positives.
 
 #### What could you do to make it more robust?
 
@@ -256,10 +257,3 @@ Individual vehicle positions should be tracked and predicted.
 This would allow vehicle image merging and occlusions to be handled.
 [Kalman filter](https://en.wikipedia.org/wiki/Kalman_filter) may be a good approach.
 
-#### Investigations
-- channels used for features
-- scale windows
-- SVM decision function
-- history averaging
-- false positives
-137,1047
